@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/ExoplanetWork.iml" filepath="$PROJECT_DIR$/.idea/ExoplanetWork.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../HZCode/.idea/HZCode.iml" filepath="$PROJECT_DIR$/../HZCode/.idea/HZCode.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../SummerCode/.idea/SummerCode.iml" filepath="$PROJECT_DIR$/../SummerCode/.idea/SummerCode.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../test/.idea/test.iml" filepath="$PROJECT_DIR$/../test/.idea/test.iml" />
+    </modules>
+  </component>
+</project>
