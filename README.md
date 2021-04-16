@@ -1,2 +1,2 @@
-# ExoplanetFilter
+# ExoplanetWork
 analyzes exoplanet habitability
