@@ -9,7 +9,7 @@ pd.set_option('display.max_columns', None, 'display.max_rows', None)
 pd.options.mode.chained_assignment = None
 
 data = ogdata.dropna(
-    subset=['pl_orbper', 'pl_trandep', 'pl_trandur', 'st_logg', 'st_teff', 'pl_imppar', 'pl_orbsmax'])
+    subset=['pl_orbper', 'pl_trandep', 'pl_trandur', 'st_logg', 'st_teff', 'pl_imppar', 'st_rad'])
 data.reset_index(drop=True, inplace=True)
 
 print('Dropping null parameters: ', len(data))
@@ -31,6 +31,7 @@ for i, row in data.iterrows():
     if star in map.keys():
         pos = len(map[star])
         map[star] = pd.concat([map[star], new_row], ignore_index=True)
+        map[star] = map[star].sort_values(by=['pl_orbper'], ascending=True, inplace=False, na_position='last')
         map[star]['sy_numPlanets'][:] = map[star]['sy_numPlanets'][0] + 1
         map[star]['position'][pos] = map[star]['sy_numPlanets'][0]
     else:

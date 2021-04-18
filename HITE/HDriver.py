@@ -14,7 +14,7 @@ pd.options.mode.chained_assignment = None
 print('Total size: ', len(data))
 
 data['pl_trandep'] = data['pl_trandep'] * 10000
-data['pl_trandur'] = data['pl_trandur'] * 24
+
 
 for i, row in data.iterrows():
     try:
@@ -39,13 +39,13 @@ hite_object = HT.HITE(data)
 
 dataframe1 = hite_object.apply_calc()
 dataframe1.dropna(subset=['max_Flux'])
-print(dataframe1.head(5))
+# print(dataframe1.head(5))
 
 # hite_object.tryPlot(dataframe1)
-
-dataframe2 = hite_object.apply_calc2()
-dataframe2.dropna(subset=['max_Flux'])
-print(dataframe2.head(5))
+#
+# dataframe2 = hite_object.apply_calc2()
+# dataframe2.dropna(subset=['max_Flux'])
+# print(dataframe2.head(5))
 
 # hite_object.tryPlot(dataframe2)
 
@@ -53,11 +53,11 @@ print(dataframe2.head(5))
 
 min_eccens = hite_object.min_eccen()
 print('First 10 minimum eccentricities:')
-print(min_eccens['min_eccen'].head(10))
+# print(min_eccens['min_eccen'].head(10))
 
 max_eccens = hite_object.GetEmax()
 print('First 10 maximum eccentricities:')
-print(max_eccens['max_eccen'].head(10))
+# print(max_eccens['max_eccen'].head(10))
 
 # temp1 = max_eccens.loc[max_eccens['max_eccen'] == -1]
 # temp2 = max_eccens.loc[max_eccens['max_eccen'] == 0.8]
@@ -65,9 +65,26 @@ print(max_eccens['max_eccen'].head(10))
 
 compilation = hite_object.calc_HITE()
 compilation = hite_object.make_leg()
-print('Theoretically the luminosity values')
-print(compilation['calc_lum'].head(5))
 
-posHp = compilation.loc[compilation['Hp'] > 0]
-print(len(posHp))
-print(posHp[['pl_name', 'Hp']])
+kep442b = data.loc[data['pl_name'] == 'Kepler-442 b']
+print('Kepler-442 b radius: ', kep442b['pl_rade'])
+print('Kepler-442 b mass: ', kep442b['pl_mass'])
+print('Kepler-442 b semia: ', kep442b['pl_semia'])
+print('Kepler-442 b semia: ', kep442b['pl_semia'])
+# Circular Duration [hour]: 6.179820
+# Transit Duration Anomoly: 0.909573
+# Minimum Eccentricity: 0.094497
+# Planet's Gravity [m/s^2]: 21.752774
+# Maximum Eccentricity: 0.800000
+# Maximum Flux [W/m^2]: 322.641778
+# Circular Instellation [Earth]: 0.811608
+# Flux Constraint: Both
+print('Kepler-442 b Scirc: ', kep442b['instellation'])
+
+# compilation = compilation.dropna(subset=['sy_jmag'])
+# # print('Theoretically the luminosity values')
+# # print(compilation['calc_lum'].head(5))
+#
+# posHp = compilation.loc[compilation['Hp'] > 0]
+# print(len(posHp))
+# print(posHp[['pl_name', 'Hp']])

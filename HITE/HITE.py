@@ -170,6 +170,8 @@ class HITE:
         self.data['min_eccen'] = ''
         self.data['st_mass'] = ''
         self.data['pl_semia'] = ''
+        self.data['pl_circdur'] = ''
+        self.data['tdanomaly'] = ''
         for i in range(len(self.data)):
             p_r = self.data['calc_rad'][i]
             s_r = self.data['st_rad'][i]
