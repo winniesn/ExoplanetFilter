@@ -8,7 +8,6 @@ import Exo.Duplicates as Dup
 
 pd.options.mode.chained_assignment = None
 
-
 class HITE:
 
     def __init__(self, dataframe):
@@ -23,6 +22,8 @@ class HITE:
         self.ppm = 1e-6
         self.hrsec = 3600
         self.daysec = 86400
+        self.aum = 1.49598e11
+        self.so_con = 1362
 
         self.G = 6.67428e-11
         self.B = 0.7344
@@ -43,6 +44,25 @@ class HITE:
         self.data['pl_trandep'] = self.data['pl_trandep'] * self.ppm
         self.data['pl_trandur'] = self.data['pl_trandur'] * self.hrsec
         self.data['pl_orbper'] = self.data['pl_orbper'] * self.daysec
+
+        self.data['calc_rad'] = ''
+        self.data['pl_mass'] = ''
+        self.data['max_Flux1'] = ''
+        self.data['pl_grav'] = ''
+        self.data['min_eccen'] = ''
+        self.data['st_mass'] = ''
+        self.data['pl_semia'] = ''
+        self.data['pl_circdur'] = ''
+        self.data['pl_tdanomaly'] = ''
+        self.data['max_eccen'] = ''
+        self.data['sy_mass'] = ''
+        self.data['rocky'] = ''
+        self.data['constraint'] = ''
+        self.data['instellation'] = ''
+        self.data['calc_lum'] = ''
+        self.data['H'] = ''
+        self.data['Hp'] = ''
+        self.data['eccen_dist'] = ''
 
     # applied in this class
     def get_radius(self, trandep, st_rad):
@@ -87,12 +107,13 @@ class HITE:
         plt.show()
 
     # applied in this class
-    def calc_flux(self, trandep, st_rad):
+    def calc_flux(self, trandep, st_rad, i):
         pl_rad = self.get_radius(trandep, st_rad)
         pl_mass = self.get_pl_mass(pl_rad)
 
         scaled_P = 610.616 * math.exp(self.l / (self.R * 273.13))
         grav = self.G * pl_mass / (pl_rad ** 2)
+        self.data['pl_grav'][i] = grav
         quad = self.l / (self.R * np.log(scaled_P * math.sqrt(self.k / (2 * self.P_0 * grav))))  # github version
         # quad = (l / R) / (np.log(scaled_P / ((2 * P_0 * g / k) ** (1 / 2)))) # book version
         # quad = l / (2 * R * (np.log(scaled_P * P_0 * g * math.sqrt(k)))) # paper version
@@ -100,21 +121,24 @@ class HITE:
         return f_max
 
     def apply_calc(self):
-        self.data['calc_rad'] = ''
-        self.data['pl_mass'] = ''
-        self.data['max_Flux1'] = ''
         for i in range(len(self.data)):
             t_d = self.data['pl_trandep'][i]
             s_r = self.data['st_rad'][i]
+            logg = self.data['st_logg'][i]
+            o_p = self.data['pl_orbper'][i]
             p_r = self.get_radius(t_d, s_r)
             p_m = self.get_pl_mass(p_r)
+            st_mass = self.get_st_mass(logg, s_r)
+            m_a = self.semia(st_mass, p_m, o_p)
             try:
-                flux = self.calc_flux(t_d, s_r)
+                flux = self.calc_flux(t_d, s_r, i)
             except:
                 flux = float('nan')
             self.data['pl_mass'][i] = p_m
             self.data['calc_rad'][i] = p_r
             self.data['max_Flux1'][i] = flux
+            self.data['st_mass'][i] = st_mass
+            self.data['pl_semia'][i] = m_a
             if flux < 10000:
                 new_row = pd.DataFrame(index = range(0,1), columns=list(self.flux_radius.columns))
                 new_row.iloc[0] = [p_r, flux]
@@ -134,11 +158,10 @@ class HITE:
         return f_max
 
     def apply_calc2(self):
-        self.data = self.data.dropna(subset=['pl_rade'])
         self.data['max_Flux2'] = ''
         for i in range(len(self.data)):
-            p_r = self.data['pl_rade'][i]
             try:
+                p_r = self.data['pl_rade'][i]
                 flux = self.calc_flux2(p_r)
             except:
                 flux = float('nan')
@@ -155,39 +178,32 @@ class HITE:
         return dSemi
 
     # applied in this class
-    def anomoly(self, st_radius, pl_radius, pl_dSemi, pl_duration, pl_impact, pl_period):
+    def anomoly(self, st_radius, pl_radius, pl_dSemi, pl_duration, pl_impact, pl_period, i):
         dCircDur = math.sqrt((1 - pl_impact ** 2) * ((st_radius + pl_radius) ** 2)) * pl_period / (pi * pl_dSemi)
+        self.data['pl_circdur'][i] = dCircDur
         dTDA = pl_duration / dCircDur
+        self.data['pl_tdanomaly'][i] = dTDA
         return dTDA
 
     # applied in this class
-    def emin(self, st_rad, pl_rad, pl_semi, pl_dur, pl_imp, pl_per):
-        dTDA = self.anomoly(st_rad, pl_rad, pl_semi, pl_dur, pl_imp, pl_per)
+    def emin(self, st_rad, pl_rad, pl_semi, pl_dur, pl_imp, pl_per, i):
+        dTDA = self.anomoly(st_rad, pl_rad, pl_semi, pl_dur, pl_imp, pl_per, i)
         emin = abs((dTDA ** 2 - 1) / (dTDA ** 2 + 1))
         return emin
 
     def min_eccen(self):
-        self.data['min_eccen'] = ''
-        self.data['st_mass'] = ''
-        self.data['pl_semia'] = ''
-        self.data['pl_circdur'] = ''
-        self.data['tdanomaly'] = ''
+
         for i in range(len(self.data)):
             p_r = self.data['calc_rad'][i]
             s_r = self.data['st_rad'][i]
             i_p = self.data['pl_imppar'][i]
-            logg = self.data['st_logg'][i]
-            st_mass = self.get_st_mass(logg, s_r)
-            pl_mass = self.data['pl_mass'][i]
+            m_a = self.data['pl_semia'][i]
             o_p = self.data['pl_orbper'][i]
-            m_a = self.semia(st_mass, pl_mass, o_p)
             t_d = self.data['pl_trandur'][i]
             try:
-                eccen = self.emin(s_r, p_r, m_a, t_d, i_p, o_p)
+                eccen = self.emin(s_r, p_r, m_a, t_d, i_p, o_p, i)
             except:
                 eccen = float('nan')
-            self.data['st_mass'][i] = st_mass
-            self.data['pl_semia'][i] = m_a
             self.data['min_eccen'][i] = eccen
         return self.data
 
@@ -205,11 +221,9 @@ class HITE:
             return math.sqrt(1 - gamma[0] ** 2)
 
     def GetEmax(self):
-        self.data['max_eccen'] = ''
-        self.data['sy_mass'] = ''
         i = 0
-        mu = [0, 0, 0]
-        gamma = [0, 0, 0]
+        mu = [0, 0]
+        gamma = [0, 0]
         while i < len(self.data):
             iNumPl = self.data['sy_numPlanets'][i]
             position = self.data['position'][i]
@@ -227,7 +241,7 @@ class HITE:
                     self.data['max_eccen'][i] = self.dHillEmax(gamma, lambd, mu, zeta)
                     if position != 1:
                         k = i - 1
-                        mu[1] = self.data['pl_mass'][i-1] / self.data['st_mass'][i]
+                        mu[1] = self.data['pl_mass'][k] / self.data['st_mass'][i]
                         zeta = mu[0] + mu[1]
                         gamma[1] = math.sqrt(1 - self.data['min_eccen'][k] ** 2)
                         lambd = math.sqrt(self.data['pl_semia'][i] / self.data['pl_semia'][k])
@@ -243,7 +257,7 @@ class HITE:
                     mu[1] = self.data['pl_mass'][j] / self.data['st_mass'][i]
                     zeta = mu[0] + mu[1]
                     gamma[1] = math.sqrt(1 - self.data['min_eccen'][j] ** 2)
-                    lambd = math.sqrt(self.data['pl_semia'][j] / self.data['pl_semia'][i])
+                    lambd = math.sqrt(self.data['pl_semia'][i] / self.data['pl_semia'][j])
                     self.data['max_eccen'][i] = self.dHillEmax(gamma, lambd, mu, zeta)
             else:
                 self.data['max_eccen'][i] = self.maxeccen
@@ -252,15 +266,16 @@ class HITE:
 
     # applied in this class
     def eccen_dist(self, e):
+
         dist = 0.1619 - 0.5352*e + 0.6358*e*e - 0.2557*pow(e,3)
         return dist
 
     # applied in this class
     def rocky(self, pl_rade):
-        if pl_rade / self.R_e > 2.5:
+        if (pl_rade / self.R_e) > 2.5:
             return 0
-        elif pl_rade / self.R_e > 1.5:
-            return 2.5 - pl_rade / self.R_e
+        elif (pl_rade / self.R_e) > 1.5:
+            return 2.5 - (pl_rade / self.R_e)
         return 1
 
     # applied in this class
@@ -269,19 +284,15 @@ class HITE:
         pl_semia = self.data['pl_semia'][i]
         rocky = self.data['rocky'][i]
         fmax = self.data['max_Flux1'][i]
-        a = self.albmin
-        e = emin
         dHabFact = 0
         dTot = 0
         bIHZ = 0
         bOHZ = 0
         if emax < 0 or emin > emax:
             return 0
-        da = 0.01
-        de = 0.01
-        flux0 = st_lum / (16 * pi * pl_semia ** 2)
-        while a <= self.albmax:
-            while e <= emax:
+        flux0 = st_lum / (16 * pi * pl_semia * pl_semia) # correct
+        for a in np.arange(self.albmin, self.albmax, 0.01):
+            for e in np.arange(emin, emax, 0.01):
                 flux = flux0 * (1 - a) / math.sqrt(1 - e * e)
                 dTot += self.eccen_dist(e)
                 if flux < fmax and flux > self.minflux:
@@ -290,8 +301,6 @@ class HITE:
                     bIHZ = 1
                 if flux < self.minflux:
                     bOHZ = 1
-                e += de
-            a += da
         if not bIHZ and not bOHZ:
             self.data['constraint'][i] = 0
         if bIHZ:
@@ -303,23 +312,16 @@ class HITE:
 
         return (dHabFact / dTot) * rocky
 
-    def calc_HITE(self):
-        self.data['rocky'] = ''
-        self.data['constraint'] = ''
-        self.data['instellation'] = ''
-        self.data['calc_lum'] = ''
-        self.data['H'] = ''
-        self.data['Hp'] = ''
+    def calc_Hp(self):
         for i in range(len(self.data)):
-            rad = self.data['pl_rade'][i]
-            st_rad = self.data['st_rad'][i]
-            teff = self.data['st_teff'][i]
-            self.data['calc_lum'] = self.get_lum(st_rad, teff)
-            lum = self.data['calc_lum'][i]
-            semia = self.data['pl_semia'][i]
-            self.data['instellation'][i] = self.get_instell(lum, semia)
-            self.data['rocky'][i] = self.rocky(rad)
+            self.data['calc_lum'][i] = self.get_lum(self.data['st_rad'][i], self.data['st_teff'][i])
+            self.data['instellation'][i] = self.get_instell(self.data['calc_lum'][i], self.data['pl_semia'][i])
+            self.data['rocky'][i] = self.rocky(self.data['calc_rad'][i])
             self.data['Hp'][i] = self.degen(self.mineccen, self.maxeccen, i)
+        return self.data
+
+    def calc_H(self):
+        for i in range(len(self.data)):
             emax = self.data['max_eccen'][i]
             emin = self.data['min_eccen'][i]
             try:
@@ -336,15 +338,29 @@ class HITE:
         return sorted
 
     def make_leg(self):
-        self.data['st_rad'] = self.data['st_rad'] / self.R_e
-        self.data['st_mass'] = self.data['st_mass'] / self.R_e
-        self.data['st_lum'] = self.data['st_lum'] / self.R_e
-        self.data['pl_trandep'] = self.data['pl_trandep'] / self.R_e
-        self.data['pl_trandur'] = self.data['pl_trandur'] / self.R_e
-        self.data['pl_orbper'] = self.data['pl_orbper'] / self.R_e
+        self.data[['pl_circdur', 'instellation']] = self.data[['pl_circdur', 'instellation']].apply(pd.to_numeric)
+        self.data['st_rad'] = self.data['st_rad'] / self.R_s
+        self.data['st_mass'] = self.data['st_mass'] / self.M_s
+        self.data['calc_lum'] = self.data['calc_lum'] / self.L_s
+        self.data['pl_trandep'] = self.data['pl_trandep'] / self.ppm
+        self.data['pl_trandur'] = self.data['pl_trandur'] / self.hrsec
+        self.data['pl_circdur'] = self.data['pl_circdur'] / self.hrsec
+        self.data['pl_orbper'] = self.data['pl_orbper'] / self.daysec
         self.data['calc_rad'] = self.data['calc_rad'] / self.R_e
-        self.data['pl_mass'] = self.data['pl_mass'] / self.R_e
-        self.data['pl_semia'] = self.data['pl_semia'] / self.R_e
-        self.data['instellation'] = self.data['instellation'] / self.R_e
+        self.data['pl_mass'] = self.data['pl_mass'] / self.M_e
+        self.data['pl_semia'] = self.data['pl_semia'] / self.aum
+        self.data['instellation'] = self.data['instellation'] / self.so_con
 
         return self.data
+
+    def plot_HZ(self, data):
+        data.plot.scatter(x='pl_semia', y='st_mass')
+        plt.show()
+
+    def plot_S_Hp(self, data):
+        data.plot.scatter(x='instellation', y='Hp')
+        plt.show()
+
+    def plot_J_Hp(self, data):
+        data.plot.scatter(x='sy_jmag', y='Hp')
+        plt.show()

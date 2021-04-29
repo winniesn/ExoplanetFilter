@@ -42,7 +42,8 @@ data['pl_trandep'] = data['pl_trandep'] * 10000
 # dataframe = dup_object.remove_dupes()
 # print('After removing dupes: ', len(dataframe))
 
-keprow1 = data.loc[data['pl_name'] == 'Kepler-442 b']
+keprow1 = data.loc[data['pl_name'] == 'TOI-1266 b']
+keprow2 = data.loc[data['pl_name'] == 'TOI-1266 c']
 print(keprow1.index)
 
 # print(dataframe.iloc[38])
@@ -55,24 +56,32 @@ print(keprow1.index)
 
 # print(keprow1)
 
-print('Planet name: ', keprow1['pl_name'][1835])
+print('Planet name: ', keprow2['pl_name'][2559])
 
-print('Stellar logg: ', keprow1['st_logg'][1835])
-print('Stellar Radius: ', keprow1['st_rad'][1835])                              # make sure to chance which keprow is being referenced
-print('Stellar Temp: ', keprow1['st_teff'][1835])
+print('')
+
+print('Stellar logg: ', keprow2['st_logg'][2559])
+print('Stellar Radius: ', keprow2['st_rad'][2559])                              # make sure to change which keprow is being referenced
+print('Stellar Temp: ', keprow2['st_teff'][2559])
+
+print('')
 
 print('Interior planet: ')
-print('Transit Depth 1: ', keprow1['pl_trandep'][1835])
-print('Orbital Period 1: ', keprow1['pl_orbper'][1835])
-print('Transit Duration 1: ', keprow1['pl_trandur'][1835])
-print('Impact Parameter 1: ', keprow1['pl_imppar'][1835])
+print('Transit Depth 1: ', keprow1['pl_trandep'][2558])
+print('Orbital Period 1: ', keprow1['pl_orbper'][2558])
+print('Transit Duration 1: ', keprow1['pl_trandur'][2558])
+print('Impact Parameter 1: ', keprow1['pl_imppar'][2558])
+# print('Postion: ', keprow1['position'][2558])
 
-# print('Planet being looked at:')
-# print('Transit Depth 2: ', keprow2['pl_trandep'][675])
-# print('Orbital Period 2: ', keprow2['pl_orbper'][675])
-# print('Transit Duration 2: ', keprow2['pl_trandur'][675])
-# print('Impact Parameter 2: ', keprow2['pl_imppar'][675])
-#
+print('')
+
+print('Planet being looked at:')
+print('Transit Depth 2: ', keprow2['pl_trandep'][2559])
+print('Orbital Period 2: ', keprow2['pl_orbper'][2559])
+print('Transit Duration 2: ', keprow2['pl_trandur'][2559])
+print('Impact Parameter 2: ', keprow2['pl_imppar'][2559])
+# print('Postion: ', keprow2['position'][2559])
+
 # print('Exterior planet: ')
 # print('Transit Depth 3: ', keprow3['pl_trandep'][676])
 # print('Orbital Period 3: ', keprow3['pl_orbper'][676])

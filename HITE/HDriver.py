@@ -15,76 +15,101 @@ print('Total size: ', len(data))
 
 data['pl_trandep'] = data['pl_trandep'] * 10000
 
-
 for i, row in data.iterrows():
     try:
-        pd.to_numeric(data['pl_imppar'][i])
+        pd.to_numeric(data['st_rad'][i])
+        pd.to_numeric(data['st_teff'][i])
+        pd.to_numeric(data['pl_trandep'][i])
         pd.to_numeric(data['pl_orbper'][i])
+        pd.to_numeric(data['st_logg'][i])
     except:
         data.drop([i], inplace=True)
 
-data[['pl_imppar', 'pl_orbper', 'pl_ntranspec', 'pl_orbsmax', 'pl_trandur', 'st_rad', 'pl_rade', 'st_mass']] = \
-    data[['pl_imppar', 'pl_orbper', 'pl_ntranspec', 'pl_orbsmax', 'pl_trandur', 'st_rad', 'pl_rade', 'st_mass']].apply(pd.to_numeric)
+data.reset_index(drop=True, inplace=True)
 
-transpecs = data.loc[data['pl_ntranspec'] > 0]
-print('How many of them have transmission spectroscopy measurements: ', len(transpecs))
+data[['st_rad', 'st_teff', 'pl_trandep', 'pl_orbper', 'st_logg']] = \
+    data[['st_rad', 'st_teff', 'pl_trandep', 'pl_orbper', 'st_logg']].apply(pd.to_numeric)
 
-# data = data.loc[data['hostname'] == 'Kepler-442']
+print('Size after dropping non-numbers first section: ', len(data))
 
-data.reset_index(inplace = True, drop = True)
-
-print(len(data))
 
 hite_object = HT.HITE(data)
 
+
 dataframe1 = hite_object.apply_calc()
 dataframe1.dropna(subset=['max_Flux'])
-# print(dataframe1.head(5))
+print(dataframe1.head(5))
 
 # hite_object.tryPlot(dataframe1)
-#
-# dataframe2 = hite_object.apply_calc2()
-# dataframe2.dropna(subset=['max_Flux'])
-# print(dataframe2.head(5))
+
+dataframe2 = hite_object.apply_calc2()
+dataframe2.dropna(subset=['max_Flux'])
+print(dataframe2.head(5))
 
 # hite_object.tryPlot(dataframe2)
 
 # hite_object.compareRadii()
 
+HpComp = hite_object.calc_Hp()
+print('Size of HpComp: ', len(HpComp))
+
+data.dropna(subset=['pl_imppar', 'pl_trandur'], inplace=True)
+data.reset_index(drop=True, inplace=True)
+
+for i, row in data.iterrows():
+    try:
+        pd.to_numeric(data['pl_imppar'][i])
+        pd.to_numeric(data['pl_trandur'][i])
+    except:
+        data.drop([i], inplace=True)
+data.reset_index(drop=True, inplace=True)
+
+data[['pl_imppar', 'pl_trandur']] = \
+    data[['pl_imppar', 'pl_trandur']].apply(pd.to_numeric)
+
+
+print('Size after dropping second null section: ', len(data))
+
 min_eccens = hite_object.min_eccen()
 print('First 10 minimum eccentricities:')
-# print(min_eccens['min_eccen'].head(10))
+print(min_eccens['min_eccen'].head(10))
 
 max_eccens = hite_object.GetEmax()
-print('First 10 maximum eccentricities:')
-# print(max_eccens['max_eccen'].head(10))
+print('First 20 maximum eccentricities:')
+print(max_eccens['max_eccen'].head(20))
 
-# temp1 = max_eccens.loc[max_eccens['max_eccen'] == -1]
-# temp2 = max_eccens.loc[max_eccens['max_eccen'] == 0.8]
-# print('How many actually have interesting max eccen: ', len(max_eccens) - len(temp1)- len(temp2))
+temp1 = max_eccens.loc[max_eccens['max_eccen'] == -1]
+temp2 = max_eccens.loc[max_eccens['max_eccen'] == 0.8]
+print('How many actually have interesting max eccen: ', len(max_eccens) - len(temp1)- len(temp2))
 
-compilation = hite_object.calc_HITE()
-compilation = hite_object.make_leg()
+HComp = hite_object.calc_H()
 
-kep442b = data.loc[data['pl_name'] == 'Kepler-442 b']
-print('Kepler-442 b radius: ', kep442b['pl_rade'])
-print('Kepler-442 b mass: ', kep442b['pl_mass'])
-print('Kepler-442 b semia: ', kep442b['pl_semia'])
-print('Kepler-442 b semia: ', kep442b['pl_semia'])
-# Circular Duration [hour]: 6.179820
-# Transit Duration Anomoly: 0.909573
-# Minimum Eccentricity: 0.094497
-# Planet's Gravity [m/s^2]: 21.752774
-# Maximum Eccentricity: 0.800000
-# Maximum Flux [W/m^2]: 322.641778
-# Circular Instellation [Earth]: 0.811608
-# Flux Constraint: Both
-print('Kepler-442 b Scirc: ', kep442b['instellation'])
+# HComp = hite_object.make_leg()
 
-# compilation = compilation.dropna(subset=['sy_jmag'])
-# # print('Theoretically the luminosity values')
-# # print(compilation['calc_lum'].head(5))
+# better, clearly
+posHp = HpComp.loc[HpComp['Hp'] > 0]
+print(len(posHp))
+# print(posHp[['pl_name', 'Hp', 'pl_pubdate', 'pl_ntranspec']])
+
+posH = HComp.loc[HComp['H'] > 0]
+print(len(posH))
+# print(posH[['pl_name', 'H']])
+
+
+posHp.sort_values(by=['Hp'], ascending=False, inplace=True, na_position='last')
+# posHp.reset_index(inplace = True)
+
+posH.sort_values(by=['H'], ascending=False, inplace=True, na_position='last')
+# posH.reset_index(inplace = True)
+
+print('Highest Hp planet: ', posHp[['pl_name', 'Hp', 'pl_ntranspec','disc_facility']])
+
+print('Highest H planet: ', posH[['pl_name', 'H', 'pl_ntranspec','disc_facility']])
+
+final = posHp.dropna(subset=['sy_jmag'])
+
+# hite_object.plot_HZ(compilation)
 #
-# posHp = compilation.loc[compilation['Hp'] > 0]
-# print(len(posHp))
-# print(posHp[['pl_name', 'Hp']])
+# hite_object.plot_S_Hp(posHp)
+#
+# hite_object.plot_J_Hp(final)
