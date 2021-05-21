@@ -4,8 +4,7 @@ import matplotlib.pyplot as plt
 
 
 ogdata = pd.read_csv('~/ASDRP/Data/TOIs_(2685).csv', low_memory=False)
-
-# ogdata.rename({'toi_created': 'pl_pubdate'}, axis=1, inplace=True)
+ogdata.rename({'toi_created': 'pl_pubdate', 'toi': 'pl_name', 'toipfx': 'hostname', 'pl_trandurh': 'pl_trandur'}, axis=1, inplace=True)
 
 print('Length of ogdata: ', len(ogdata))
 pd.set_option('display.max_columns', None, 'display.max_rows', None)
@@ -63,7 +62,7 @@ for system in map:
     if leng > 1:
         for i in range(leng):
             map[system]['position'][i] = i + 1
-        print(map[system][['pl_name', 'hostname', 'sy_numPlanets', 'position']])
+        # print(map[system][['pl_name', 'hostname', 'sy_numPlanets', 'position']])
     finaldf = pd.concat([finaldf, map[system]], ignore_index = True)
 
 

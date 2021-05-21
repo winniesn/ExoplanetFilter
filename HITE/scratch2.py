@@ -5,7 +5,10 @@ import Exo.Duplicates as Dup
 # rowid = row - 1
 # row = index + 2
 
-data = pd.read_csv('~/ASDRP/Data/DeDuped.csv', low_memory=False)
+data = pd.read_csv('~/ASDRP/Data/Confirmed_(4384).csv', low_memory=False)
+
+data.rename({'koi_prad': 'pl_rade', 'kepoi_name': 'pl_name', 'koi_period': 'pl_orbper', 'koi_depth': 'pl_trandep', 'koi_slogg': 'st_logg',
+             'koi_steff': 'st_teff', 'koi_srad': 'st_rad', 'koi_impact': 'pl_imppar', 'koi_duration': 'pl_trandur'}, axis=1, inplace=True)
 
 pd.set_option('display.max_columns', None, 'display.max_rows', None)
 pd.options.mode.chained_assignment = None
@@ -42,8 +45,7 @@ data['pl_trandep'] = data['pl_trandep'] * 10000
 # dataframe = dup_object.remove_dupes()
 # print('After removing dupes: ', len(dataframe))
 
-keprow1 = data.loc[data['pl_name'] == 'TOI-1266 b']
-keprow2 = data.loc[data['pl_name'] == 'TOI-1266 c']
+keprow1 = data.loc[data['pl_name'] == 'Kepler-1652 b']
 print(keprow1.index)
 
 # print(dataframe.iloc[38])
@@ -56,30 +58,30 @@ print(keprow1.index)
 
 # print(keprow1)
 
-print('Planet name: ', keprow2['pl_name'][2559])
+print('Planet name: ', keprow1['pl_name'][2353])
 
 print('')
 
-print('Stellar logg: ', keprow2['st_logg'][2559])
-print('Stellar Radius: ', keprow2['st_rad'][2559])                              # make sure to change which keprow is being referenced
-print('Stellar Temp: ', keprow2['st_teff'][2559])
+print('Stellar logg: ', keprow1['st_logg'][2353])
+print('Stellar Radius: ', keprow1['st_rad'][2353])                              # make sure to change which keprow is being referenced
+print('Stellar Temp: ', keprow1['st_teff'][2353])
 
 print('')
 
-print('Interior planet: ')
-print('Transit Depth 1: ', keprow1['pl_trandep'][2558])
-print('Orbital Period 1: ', keprow1['pl_orbper'][2558])
-print('Transit Duration 1: ', keprow1['pl_trandur'][2558])
-print('Impact Parameter 1: ', keprow1['pl_imppar'][2558])
+# print('Interior planet: ')
+# print('Transit Depth 1: ', keprow1['pl_trandep'][6890])
+# print('Orbital Period 1: ', keprow1['pl_orbper'][6890])
+# print('Transit Duration 1: ', keprow1['pl_trandur'][6890])
+# print('Impact Parameter 1: ', keprow1['pl_imppar'][6890])
 # print('Postion: ', keprow1['position'][2558])
 
 print('')
 
 print('Planet being looked at:')
-print('Transit Depth 2: ', keprow2['pl_trandep'][2559])
-print('Orbital Period 2: ', keprow2['pl_orbper'][2559])
-print('Transit Duration 2: ', keprow2['pl_trandur'][2559])
-print('Impact Parameter 2: ', keprow2['pl_imppar'][2559])
+print('Transit Depth 2: ', keprow1['pl_trandep'][2353])
+print('Orbital Period 2: ', keprow1['pl_orbper'][2353])
+print('Transit Duration 2: ', keprow1['pl_trandur'][2353])
+print('Impact Parameter 2: ', keprow1['pl_imppar'][2353])
 # print('Postion: ', keprow2['position'][2559])
 
 # print('Exterior planet: ')
@@ -102,3 +104,4 @@ print('Impact Parameter 2: ', keprow2['pl_imppar'][2559])
 # print(len(no_major_axis))
 #
 # print(dataframe['pl_name'].head(30))
+

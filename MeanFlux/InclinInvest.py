@@ -33,13 +33,13 @@ class FluxInvestigation:
             except:
                 dataset.at[i, 'calc_flux'] = float('nan')
 
-        self.compare_flux_types(dataset)
+        # self.compare_flux_types(dataset)
 
         Q = 1370 # W m^-2
         innerbound = 1.1 * Q
-        print('Innerbound flux: ', innerbound)
+        # print('Innerbound flux: ', innerbound)
         outerbound = 0.51 * Q
-        print('Outerbound flux: ', outerbound)
+        # print('Outerbound flux: ', outerbound)
         in_range = dataset.loc[(dataset['calc_flux'] >= outerbound) & (dataset['calc_flux'] <= innerbound)]
         return in_range
 

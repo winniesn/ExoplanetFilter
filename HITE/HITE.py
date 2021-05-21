@@ -14,6 +14,7 @@ class HITE:
         self.data = dataframe
         self.flux_radius = pd.DataFrame(columns=['radius', 'max_Flux'])
         self.real_fr = pd.DataFrame(columns=['radius', 'max_Flux'])
+        self.alb_flux_relat = pd.DataFrame(columns=['albedo', 'flux'])
         self.R_e = 6378100
         self.M_e = 5.972186e24
         self.R_s = 6.957e8
@@ -292,6 +293,7 @@ class HITE:
             return 0
         flux0 = st_lum / (16 * pi * pl_semia * pl_semia) # correct
         for a in np.arange(self.albmin, self.albmax, 0.01):
+            flux = 0
             for e in np.arange(emin, emax, 0.01):
                 flux = flux0 * (1 - a) / math.sqrt(1 - e * e)
                 dTot += self.eccen_dist(e)
@@ -301,6 +303,9 @@ class HITE:
                     bIHZ = 1
                 if flux < self.minflux:
                     bOHZ = 1
+            # new_row = pd.DataFrame(index=range(0, 1), columns=list(self.alb_flux_relat.columns))
+            # new_row.iloc[0] = [a, flux]
+            # self.alb_flux_relat = pd.concat([self.alb_flux_relat, new_row], ignore_index=True)
         if not bIHZ and not bOHZ:
             self.data['constraint'][i] = 0
         if bIHZ:
@@ -363,4 +368,8 @@ class HITE:
 
     def plot_J_Hp(self, data):
         data.plot.scatter(x='sy_jmag', y='Hp')
+        plt.show()
+
+    def plot_albflux(self):
+        self.alb_flux_relat.plot.scatter(x='albedo', y='flux')
         plt.show()

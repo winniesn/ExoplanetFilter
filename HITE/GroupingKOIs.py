@@ -3,14 +3,19 @@ import Exo.Duplicates as Dup
 import matplotlib.pyplot as plt
 
 
-ogdata = pd.read_csv('~/ASDRP/Data/TOIs_(2685).csv', low_memory=False)
-
-# ogdata.rename({'toi_created': 'pl_pubdate'}, axis=1, inplace=True)
+ogdata = pd.read_csv('~/ASDRP/Data/KOIs_(9564).csv', low_memory=False)
+ogdata.rename({'koi_vet_date': 'pl_pubdate', 'koi_prad': 'pl_rade', 'kepoi_name': 'pl_name', 'koi_period': 'pl_orbper', 'koi_depth': 'pl_trandep', 'koi_slogg': 'st_logg',
+             'koi_steff': 'st_teff', 'koi_srad': 'st_rad', 'koi_impact': 'pl_imppar', 'koi_duration': 'pl_trandur'}, axis=1, inplace=True)
 
 print('Length of ogdata: ', len(ogdata))
 pd.set_option('display.max_columns', None, 'display.max_rows', None)
 pd.options.mode.chained_assignment = None
 
+
+ogdata['hostname'] = ''
+for i in range(len(ogdata)):
+    ogdata['hostname'][i] = ogdata['pl_name'][i][0:6]
+print(ogdata['hostname'].head(10))
 ogdata['sy_numPlanets'] = 1
 ogdata['position'] = 1
 
@@ -63,7 +68,7 @@ for system in map:
     if leng > 1:
         for i in range(leng):
             map[system]['position'][i] = i + 1
-        print(map[system][['pl_name', 'hostname', 'sy_numPlanets', 'position']])
+        # print(map[system][['pl_name', 'hostname', 'sy_numPlanets', 'position']])
     finaldf = pd.concat([finaldf, map[system]], ignore_index = True)
 
 
@@ -71,4 +76,4 @@ for system in map:
 
 print(len(finaldf))
 
-finaldf.to_csv('~/ASDRP/Data/Grouped/GroupedTOIs.csv', index=False)
+finaldf.to_csv('~/ASDRP/Data/Grouped/GroupedKOIs.csv', index=False)
